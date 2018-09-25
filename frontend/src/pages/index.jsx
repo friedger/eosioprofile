@@ -275,9 +275,7 @@ class Index extends Component {
   }
   }
 
-  componentDidMount() {
-    this.getTable();
-
+  componentDidMount() {    
 
     ScatterJS.scatter.connect("EOSIO Profile").then(connected => {
       console.log("connected " + connected.toString());
@@ -288,6 +286,7 @@ class Index extends Component {
       const eosOptions = { expireInSeconds:60 };
       eos = scatter.eos(network, Eos, eosOptions);
       this.setState({loading:false});
+      this.getTable();
     });
 
 
