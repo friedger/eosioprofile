@@ -126,9 +126,18 @@ Example from https://gaia.blockstack.org/hub/1Maw8BjWgj6MWrBCfupqQuWANthMhefb2v/
       }
     ]
 
+
 ## More data 
 * BP have already a bp.json
 * contracts (accounts) can store their web UIs in their profile
 * NFTs contracts can publish their attributes of tokens
+
+### Dappnetwork (https://github.com/bancorprotocol/eos-dapp-network)
+    {"enabled": true, "ipfshash":"YourIPFSHash", "name": "App Display Name"}
+    {"enabled": true, "appurl":"https://yourappdomain.com", "name": "App Display Name"}
+    
+
+
+
 
 
