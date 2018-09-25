@@ -44,9 +44,7 @@ network.port = 443;
 const connect = async () => {
   const requiredFields = { accounts:[network] };
   await scatter.getIdentity(requiredFields).then(() => {
-      account = scatter.identity.accounts.find(x => x.blockchain === 'eos');
-      const eosOptions = { expireInSeconds:60 };
-      eos = scatter.eos(network, Eos, eosOptions);
+      account = scatter.identity.accounts.find(x => x.blockchain === 'eos');      
       console.log("account: " + account.name);
       return true;
   }).catch(e => {
@@ -115,7 +113,8 @@ class Index extends Component {
       account: undefined,
       anchorEl: null,
       showEdit: false,
-      profileUrl: null
+      profileUrl: null,
+      loading:true,
     };
     this.handleTitanFormEvent = this.handleTitanFormEvent.bind(this);
     this.handleGithubFormEvent = this.handleGithubFormEvent.bind(this);
@@ -164,7 +163,7 @@ class Index extends Component {
       fetch(uri).then(async result => {
         const profilePlain = await result.text();
         const hash = ecc.sha256(profilePlain)
-        if (hash == uriHash) {
+        if (hash === uriHash) {
           const profile = JSON.parse(profilePlain)
           const profileUrl = profile.profile.profile_picture_url        
           console.log("profileUrl " + profileUrl);
@@ -263,14 +262,17 @@ class Index extends Component {
   // gets table data from the blockchain
   // and saves it into the component state: "profileTable"
   getTable() {
-    const eos = Eos();
+    if (eos) {
     eos.getTableRows({
       "json": true,
       "code": "eosioprofile",   // contract who owns the table
       "scope": "eosioprofile",  // scope of the table
       "table": "profiles",    // name of the table as specified by the contract abi
       "limit": 100,
-    }).then(result => this.setState({ profileTable: result.rows }));
+    }).then(result => this.setState({ profileTable: result.rows, loading:false }));
+  } else {
+    this.setState({loading:true})
+  }
   }
 
   componentDidMount() {
@@ -282,6 +284,10 @@ class Index extends Component {
       if(!connected) return false;
       scatter = ScatterJS.scatter;
       window.scatter = null;
+
+      const eosOptions = { expireInSeconds:60 };
+      eos = scatter.eos(network, Eos, eosOptions);
+      this.setState({loading:false});
     });
 
 
@@ -292,7 +298,7 @@ class Index extends Component {
   };
 
   render() {
-    const { profileTable, account, anchorEl, showEdit, profileUrl } = this.state;
+    const { profileTable, account, anchorEl, showEdit, profileUrl, loading } = this.state;
     const open = Boolean(anchorEl);
     const { classes } = this.props;
 
@@ -375,7 +381,8 @@ class Index extends Component {
                 onClick={async () => await this.getEosAccount()}>Login</Button>)}                                          
           </Toolbar>
         </AppBar>
-        {!showEdit && profileCards}
+        {!showEdit && !loading && profileCards}
+        {!showEdit && loading && (<span>Connecting...</span>)}
         {showEdit &&(<div>
         <Paper className={classes.paper}>
           <form onSubmit={this.handleTitanFormEvent}>                        
